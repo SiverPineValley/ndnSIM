@@ -1,0 +1,23 @@
+# topo-test.txt
+
+
+router
+
+#node	city	y	x	mpi-partition
+node-5	NA	0	-20	5	
+node-1	NA	20	40	1
+node-2	NA	20	20	2
+node-3	NA	20	0	3
+node-4	NA	20	-20	4
+AP	NA	40	10	1
+root	NA	60	10	0
+
+link
+
+# from	    to		capacity	metric	delay	queue
+node-1	    AP		10Mbps		1	1ms		100
+node-2	    AP		10Mbps		1	1ms		100
+node-3	    AP		10Mbps		1	1ms		100
+node-4	    AP		10Mbps		1	1ms		100
+node-5	    node-4	10Mbps		1	1ms 		100
+AP	    root	10Mbps		1	1ms 		100
