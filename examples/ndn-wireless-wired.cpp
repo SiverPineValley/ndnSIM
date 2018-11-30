@@ -25,6 +25,9 @@ namespace ns3
  *     ./waf --run=ndn-wireless-wired
  */
   
+
+  // CallBack Funcitons
+
     ns3::DelayJitterEstimation es;
 
     void
@@ -42,11 +45,11 @@ namespace ns3
         "\t" << "Simulation" << "\t" << Simulator::Now().GetSeconds() << "\n";
     }
 
-    // void
-    // MacTxDropTrace(std::string s, Ptr<const Packet> p)
-    // {
-    //  std::cout << "MAC Tx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\n";
-    // }
+    void
+    MacTxDropTrace(std::string s, Ptr<const Packet> p)
+    {
+     std::cout << "MAC Tx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\n";
+    }
 
     void
     MacRxDropTrace(std::string s, Ptr<const Packet> p)
@@ -54,17 +57,17 @@ namespace ns3
         std::cout << "MAC Rx Drop" << "\t" << Simulator::Now().GetSeconds() << " second"  << "\t" << "UID" << "\t" << p->GetUid() << "\n";
     }
 
-    // void
-    // PhyTxDropTrace(std::string s, Ptr<const Packet> p)
-    // {
-    //  std::cout << "Phy Tx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\n";
-    // }
+    void
+    PhyTxDropTrace(std::string s, Ptr<const Packet> p)
+    {
+     std::cout << "Phy Tx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\n";
+    }
 
-    // void
-    // PhyRxDropTrace(std::string s, Ptr<const Packet> p)
-    // {
-    //  std::cout << "Phy Rx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\t" << "UID" << "\t" << p->GetUid() << "\n";
-    // }
+    void
+    PhyRxDropTrace(std::string s, Ptr<const Packet> p)
+    {
+     std::cout << "Phy Rx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\t" << "UID" << "\t" << p->GetUid() << "\n";
+    }
 
     void
     CheckPIT(Ptr<Node> n)
@@ -86,6 +89,24 @@ namespace ns3
         std::cout << "MAC Delay" << "\t" << es.GetLastDelay().GetSeconds() << " second" << 
         "\t" << "Simulation" << "\t" << Simulator::Now().GetSeconds() << "\n";
     }
+
+    // void
+    // WillBeCalledWhenInterestIsReceived( std::shared_ptr<const ndn::Interest> i, Ptr<ndn::App> a, std::shared_ptr<ndn::Face> f )
+    // {
+    //     cout << "Interest is Received at " << f->getId() << "\t" << i->getName().toUri();
+    // }
+
+    // void
+    // WillBeCalledWhenDataIsReceived( shared_ptr<const ndn::Data> d , Ptr<ndn::App> a, shared_ptr<ndn::Face> f )
+    // {  
+    //     cout << "Data is Received at " << f->getId() << "\t" << d->getName().toUri() << "\t" << d->getContent().value();
+    // }
+
+    // void
+    // ReceivedNack( shared_ptr< const lp::Nack >, Ptr< ndn::App >, shared_ptr< nfd::Face > )
+    // {
+    //     cout << "Data is Received at " << f->getId() << "\t" << d->getName().toUri() << "\t" << d->getContent().value();
+    // }
 
   int main (int argc, char *argv[])
   {
@@ -310,6 +331,9 @@ namespace ns3
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback(&MacRxDropTrace));
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxDrop", MakeCallback(&PhyTxDropTrace));
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop", MakeCallback(&PhyRxDropTrace));
+    // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedInterests", MakeCallback(&WillBeCalledWhenInterestIsReceived));
+    // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedDatas", MakeCallback(&WillBeCalledWhenDataIsReceived));
+    // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedNacks", MakeCallback(&ReceivedNack));
     // ndn::L3RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
     // L2RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
 
