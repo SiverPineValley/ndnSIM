@@ -250,7 +250,7 @@ namespace ns3
     ndnHelper.InstallAll();
 
     // Choosing forwarding strategy
-    ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/best-route");
+    ndn::StrategyChoiceHelper::InstallAll("", "/localhost/nfd/strategy/custom-strategy");
 
     // Installing global routing interface on all nodes
     ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
@@ -264,48 +264,50 @@ namespace ns3
 
     ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
     consumerHelper.SetAttribute("Frequency", DoubleValue(10.0));
+    consumerHelper.SetAttribute("Randomize", StringValue("uniform"));
     consumerHelper.SetAttribute("StartTime", StringValue("0"));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("10"));
-    consumerHelper.SetPrefix("/root0/prefix");
-    consumerHelper.Install(consumers.Get(0));
-
-    consumerHelper.SetAttribute("StopTime", StringValue("10"));
-    consumerHelper.SetPrefix("/root1/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
+    consumerHelper.SetPrefix("/root1");
     consumerHelper.Install(consumers.Get(1));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("10"));
-    consumerHelper.SetPrefix("/root2/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
+    consumerHelper.SetPrefix("/root2");
     consumerHelper.Install(consumers.Get(2));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("20"));
-    consumerHelper.SetPrefix("/root3/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
+    consumerHelper.SetPrefix("/root3");
     consumerHelper.Install(consumers.Get(3));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("20"));
-    consumerHelper.SetPrefix("/root4/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
+    consumerHelper.SetPrefix("/root4");
     consumerHelper.Install(consumers.Get(4));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("20"));
-    consumerHelper.SetPrefix("/root5/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("400"));
+    consumerHelper.SetPrefix("/root5");
     consumerHelper.Install(consumers.Get(5));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("30"));
-    consumerHelper.SetPrefix("/root6/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("400"));
+    consumerHelper.SetPrefix("/root6");
     consumerHelper.Install(consumers.Get(6));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("30"));
-    consumerHelper.SetPrefix("/root7/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("500"));
+    consumerHelper.SetPrefix("/root7");
     consumerHelper.Install(consumers.Get(7));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("30"));
-    consumerHelper.SetPrefix("/root8/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("500"));
+    consumerHelper.SetPrefix("/root8");
     consumerHelper.Install(consumers.Get(8));
 
-    consumerHelper.SetAttribute("StopTime", StringValue("30"));
-    consumerHelper.SetPrefix("/root9/prefix");
+    consumerHelper.SetAttribute("MaxSeq", StringValue("500"));
+    consumerHelper.SetPrefix("/root9");
     consumerHelper.Install(consumers.Get(9));
 
+    // request Huge
+    consumerHelper.SetPrefix("/root0");
+    consumerHelper.SetAttribute("Frequency", DoubleValue(100.0));
+    consumerHelper.SetAttribute("MaxSeq", StringValue("1000"));
+    consumerHelper.Install(consumers.Get(0));
 
     // Register /root prefix with global routing controller and
     // install producer that will satisfy Interests in /root namespace
@@ -318,6 +320,19 @@ namespace ns3
         producerHelper.SetPrefix(pprefix[i]);
         producerHelper.Install(producers[i]);
     }
+
+    // Modify CS
+    // GetNode()
+    // auto tempData = new ndn::Data();
+    // tempData->setName(ndn::Name("/root0"));
+    // std::string datao = "Software";
+    // const uint8_t* datas = atoi (datao.c_str());
+    // nfd::Cs& myCs = producers[0]->GetObject<ndn::L3Protocol>()->getForwarder()->getCs();
+    // for ( int i = 0; i < 1000; i++ )
+    // {   
+        // tempData->setContent(datas, sizeof(*datas)/sizeof(uint8_t));
+    // myCs.insert(*tempData, false);
+    // }
 
     // Calculate and install FIBs
     ndn::GlobalRoutingHelper::CalculateRoutes();
@@ -334,19 +349,20 @@ namespace ns3
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedInterests", MakeCallback(&WillBeCalledWhenInterestIsReceived));
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedDatas", MakeCallback(&WillBeCalledWhenDataIsReceived));
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedNacks", MakeCallback(&ReceivedNack));
-    // ndn::L3RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
+    ndn::L3RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
     // L2RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
+    ndn::CsTracer::InstallAll("ndn-wireless-wired-cs-trace.txt", Seconds(1));
 
     // wifiApNode
     // consumers.Get(10)
     // producers[0]
-    Simulator::Schedule(Seconds(0.0), CheckPIT, wifiApNode);
-    Simulator::Schedule(Seconds(5.0), CheckPIT, wifiApNode);
-    Simulator::Schedule(Seconds(10.0), CheckPIT, wifiApNode);
-    Simulator::Schedule(Seconds(15.0), CheckPIT, wifiApNode);
-    Simulator::Schedule(Seconds(20.0), CheckPIT, wifiApNode);
-    Simulator::Schedule(Seconds(25.0), CheckPIT, wifiApNode);
-    Simulator::Schedule(Seconds(30.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(0.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(5.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(10.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(15.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(20.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(25.0), CheckPIT, wifiApNode);
+    // Simulator::Schedule(Seconds(30.0), CheckPIT, wifiApNode);
 
     // Simulator::Schedule(Seconds(0.5), CheckMacDelay);
     // Simulator::Schedule(Seconds(5.0), CheckMacDelay);
@@ -356,7 +372,7 @@ namespace ns3
     // Simulator::Schedule(Seconds(25.0), CheckMacDelay);
     // Simulator::Schedule(Seconds(30.0), CheckMacDelay);
 
-    Simulator::Stop (Seconds (30.0));
+    Simulator::Stop (Seconds (60.0));
 
     Simulator::Run ();
     Simulator::Destroy ();
