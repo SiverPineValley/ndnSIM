@@ -259,7 +259,7 @@ namespace ns3
     // 4. Set up applications
     NS_LOG_INFO("Installing Applications");
     
-    std::string pprefix[10] = { "/root0", "/root1", "/root2", "/root3",
+    std::string pprefix[10] = { "/Huge", "/root1", "/root2", "/root3",
         "/root4", "/root5", "/root6", "/root7", "/root8", "/root9" };
 
     ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
@@ -304,7 +304,7 @@ namespace ns3
     consumerHelper.Install(consumers.Get(9));
 
     // request Huge
-    consumerHelper.SetPrefix("/root0");
+    consumerHelper.SetPrefix("/Huge");
     consumerHelper.SetAttribute("Frequency", DoubleValue(100.0));
     consumerHelper.SetAttribute("MaxSeq", StringValue("1000"));
     consumerHelper.Install(consumers.Get(0));
@@ -336,9 +336,9 @@ namespace ns3
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedInterests", MakeCallback(&WillBeCalledWhenInterestIsReceived));
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedDatas", MakeCallback(&WillBeCalledWhenDataIsReceived));
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedNacks", MakeCallback(&ReceivedNack));
-    ndn::L3RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
+    ndn::L3RateTracer::InstallAll("ndn-wireless-wired-trace2.txt", Seconds(0.5));
     // L2RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
-    ndn::CsTracer::InstallAll("ndn-wireless-wired-cs-trace.txt", Seconds(1));
+    ndn::CsTracer::InstallAll("ndn-wireless-wired-cs-trace2.txt", Seconds(1));
 
     // wifiApNode
     // consumers.Get(10)
