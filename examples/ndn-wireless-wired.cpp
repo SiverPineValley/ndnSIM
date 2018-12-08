@@ -29,6 +29,8 @@ namespace ns3
   // CallBack Funcitons
 
     ns3::DelayJitterEstimation es;
+    uint32_t dropcnt = 0;
+    uint32_t tdropcnt = 0;
 
     void
     MacTxTrace(std::string s, Ptr<const Packet> p)
@@ -48,13 +50,15 @@ namespace ns3
     void
     MacTxDropTrace(std::string s, Ptr<const Packet> p)
     {
-     std::cout << "MAC Tx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\n";
+        // std::cout << "MAC Tx Drop" << "\t" << Simulator::Now().GetSeconds() << " second" << "\n";
+        tdropcnt++;
     }
 
     void
     MacRxDropTrace(std::string s, Ptr<const Packet> p)
     {
-        std::cout << "MAC Rx Drop" << "\t" << Simulator::Now().GetSeconds() << " second"  << "\t" << "UID" << "\t" << p->GetUid() << "\n";
+        // std::cout << "MAC Rx Drop" << "\t" << Simulator::Now().GetSeconds() << " second"  << "\t" << "UID" << "\t" << p->GetUid() << "\n";
+        dropcnt++;
     }
 
     void
@@ -107,6 +111,13 @@ namespace ns3
     // {
     //     cout << "Data is Received at " << f->getId() << "\t" << d->getName().toUri() << "\t" << d->getContent().value();
     // }
+
+    void
+    printMacDrop(void)
+    {
+        uint32_t sumofdrop = dropcnt + tdropcnt;
+        std::cout << "Total Mac Drop: " << sumofdrop << "\n";
+    }
 
   int main (int argc, char *argv[])
   {
@@ -237,7 +248,7 @@ namespace ns3
     initialAlloc->Add(Vector(-40, 0., 0.));
     initialAlloc->Add(Vector(-60, 0., 0.));
     initialAlloc->Add(Vector(-80, 0., 0.));
-    initialAlloc->Add(Vector(-100, 0., 0.));
+    initialAlloc->Add(Vector(-90, 0., 0.));
     mobility.SetPositionAllocator(initialAlloc);
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
     mobility.Install(consumers);
@@ -250,7 +261,7 @@ namespace ns3
     ndnHelper.InstallAll();
 
     // Choosing forwarding strategy
-    ndn::StrategyChoiceHelper::InstallAll("", "/localhost/nfd/strategy/custom-strategy");
+    ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route");
 
     // Installing global routing interface on all nodes
     ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
@@ -267,27 +278,11 @@ namespace ns3
     consumerHelper.SetAttribute("Randomize", StringValue("uniform"));
     consumerHelper.SetAttribute("StartTime", StringValue("0"));
 
-    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
-    consumerHelper.SetPrefix("/root1");
-    consumerHelper.Install(consumers.Get(1));
-
-    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
-    consumerHelper.SetPrefix("/root2");
-    consumerHelper.Install(consumers.Get(2));
-
-    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
-    consumerHelper.SetPrefix("/root3");
-    consumerHelper.Install(consumers.Get(3));
-
-    consumerHelper.SetAttribute("MaxSeq", StringValue("300"));
-    consumerHelper.SetPrefix("/root4");
-    consumerHelper.Install(consumers.Get(4));
-
-    consumerHelper.SetAttribute("MaxSeq", StringValue("400"));
+    consumerHelper.SetAttribute("MaxSeq", StringValue("500"));
     consumerHelper.SetPrefix("/root5");
     consumerHelper.Install(consumers.Get(5));
 
-    consumerHelper.SetAttribute("MaxSeq", StringValue("400"));
+    consumerHelper.SetAttribute("MaxSeq", StringValue("500"));
     consumerHelper.SetPrefix("/root6");
     consumerHelper.Install(consumers.Get(6));
 
@@ -309,6 +304,18 @@ namespace ns3
     consumerHelper.SetAttribute("MaxSeq", StringValue("1000"));
     consumerHelper.Install(consumers.Get(0));
 
+    consumerHelper.SetPrefix("/root1");
+    consumerHelper.Install(consumers.Get(1));
+
+    consumerHelper.SetPrefix("/root2");
+    consumerHelper.Install(consumers.Get(2));
+
+    consumerHelper.SetPrefix("/root3");
+    consumerHelper.Install(consumers.Get(3));
+
+    consumerHelper.SetPrefix("/root4");
+    consumerHelper.Install(consumers.Get(4));
+
     // Register /root prefix with global routing controller and
     // install producer that will satisfy Interests in /root namespace
     ndn::AppHelper producerHelper("ns3::ndn::Producer");
@@ -329,8 +336,8 @@ namespace ns3
 
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx", MakeCallback(&MacTxTrace));
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx", MakeCallback(&MacRxTrace));
-    // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback(&MacTxDropTrace));
-    // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback(&MacRxDropTrace));
+    Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTxDrop", MakeCallback(&MacTxDropTrace));
+    Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRxDrop", MakeCallback(&MacRxDropTrace));
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyTxDrop", MakeCallback(&PhyTxDropTrace));
     // Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/PhyRxDrop", MakeCallback(&PhyRxDropTrace));
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedInterests", MakeCallback(&WillBeCalledWhenInterestIsReceived));
@@ -338,7 +345,8 @@ namespace ns3
     // Config::Connect("/NodeList/*/ApplicationList/*/$ns3::ndn::App/ReceivedNacks", MakeCallback(&ReceivedNack));
     ndn::L3RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
     // L2RateTracer::InstallAll("ndn-wireless-wired-trace.txt", Seconds(0.5));
-    ndn::CsTracer::InstallAll("ndn-wireless-wired-cs-trace.txt", Seconds(1));
+    // ndn::CsTracer::InstallAll("ndn-wireless-wired-cs-trace.txt", Seconds(1));
+    ndn::AppDelayTracer::InstallAll("ndn-wireless-wired-app-delays-trace.txt");
 
     // wifiApNode
     // consumers.Get(10)
@@ -356,6 +364,8 @@ namespace ns3
     Simulator::Schedule(Seconds(50.0), CheckPIT, wifiApNode);
     Simulator::Schedule(Seconds(55.0), CheckPIT, wifiApNode);
     Simulator::Schedule(Seconds(60.0), CheckPIT, wifiApNode);
+    Simulator::Schedule(Seconds(120.0), printMacDrop);
+
 
     // Simulator::Schedule(Seconds(0.5), CheckMacDelay);
     // Simulator::Schedule(Seconds(5.0), CheckMacDelay);
