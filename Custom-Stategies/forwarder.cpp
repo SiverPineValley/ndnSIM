@@ -233,7 +233,7 @@ Forwarder::onContentStoreHit(const Face& inFace, const shared_ptr<pit::Entry>& p
   if ( content_name.find("Huge") != std::string::npos )
   {
     // If Network is busy.
-    if ( m_pit.size() >= 7 )
+    if ( m_pit.size() >=7 )
     {
       // Sending Packet that implies the sending of Huge Data will be started later.
       lp::Nack nack(interest);
@@ -277,9 +277,36 @@ Forwarder::onOutgoingInterest(const shared_ptr<pit::Entry>& pitEntry, Face& outF
   // insert out-record
   pitEntry->insertOrUpdateOutRecord(outFace, interest);
 
-  // send Interest
-  outFace.sendInterest(interest);
-  ++m_counters.nOutInterests;
+  if(!this->m_pit.getTransmit() && ( this->m_pit.size() >= 10 ) )
+  {
+    if(!m_rtxInterest.empty())
+    {
+      // for( auto it = m_pit.begin(); it != m_pit.end(); it++ )
+      // {
+      //   if(!(*it).isSatisfied)
+      //     outFace.sendInterest((*it).getInterest());
+      // }
+      auto it = m_rtxInterest.front();
+      while(it != m_rtxInterest.back())
+      {
+        outFace.sendInterest(it);
+        m_rtxInterest.pop();
+        it = m_rtxInterest.front();
+      }
+    }
+    m_pit.setTransmit(true);
+  }
+
+  if(this->m_pit.getTransmit())
+  {
+    // send Interest
+    outFace.sendInterest(interest);
+    ++m_counters.nOutInterests;
+  }
+  else
+  {
+    m_rtxInterest.push(interest);
+  }
 }
 
 void
@@ -331,7 +358,9 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
 
   // CS insert
   if (m_csFromNdnSim == nullptr)
+  {
     m_cs.insert(*dataCopyWithoutTag);
+  }
   else
     m_csFromNdnSim->Add(dataCopyWithoutTag);
 
@@ -371,30 +400,7 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
       // // If Network is busy.
       if ( m_pit.size() >= 7 )
       {
-        // std::set<Face*> pendingDownstreams;
-        // auto now = time::steady_clock::now();
-
-        // // remember pending downstreams
-        // for (const pit::InRecord& inRecord : pitEntry->getInRecords()) {
-        //   if (inRecord.getExpiry() > now) {
-        //     pendingDownstreams.insert(&inRecord.getFace());
-        //   }
-        // }
-
-        // // foreach pending downstream
-        // for (Face* pendingDownstream : pendingDownstreams) {
-        //   if (pendingDownstream->getId() == inFace.getId() &&
-        //       pendingDownstream->getLinkType() != ndn::nfd::LINK_TYPE_AD_HOC) {
-        //     continue;
-        //   }
-        //   // send Nack to pipeline
-        // }
-
-        // // Sending Packet that implies the sending of Huge Data will be started later.
-        // lp::Nack nack(data);
-        // nack.setReason(lp::NackReason::CONGESTION);
-        
-        // const_cast<Face&>(*pendingDownstream).sendNack(nack);
+        m_rtxData.push(data);
         return;
       // Else, If the network is not busy, it will start sending Huge Data.
       }
@@ -443,7 +449,32 @@ Forwarder::onIncomingData(Face& inFace, const Data& data)
         }
         // goto outgoing Data pipeline
         this->onOutgoingData(data, *pendingDownstream);
+
       }
+
+      if(!m_rtxData.empty())
+      {
+        auto it = m_rtxData.front();
+        int i = 0;
+        while( ( it != m_rtxData.back() ) || ( i < 10 ) )
+        { 
+
+          for (Face* pendingDownstream : pendingDownstreams) {
+            if (pendingDownstream->getId() == inFace.getId() &&
+                pendingDownstream->getLinkType() != ndn::nfd::LINK_TYPE_AD_HOC) {
+              continue;
+            }
+            // goto outgoing Data pipeline
+            (*pendingDownstream).sendData(data);
+            ++m_counters.nOutData;
+          }
+
+          m_rtxData.pop();
+          it = m_rtxData.front();
+          i++;
+        }
+      }
+
     }
   }
 }

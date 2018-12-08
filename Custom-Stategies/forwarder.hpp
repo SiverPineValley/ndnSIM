@@ -38,6 +38,8 @@
 #include "table/strategy-choice.hpp"
 #include "table/dead-nonce-list.hpp"
 #include "table/network-region-table.hpp"
+#include <queue>
+#include <utility>
 
 #include "ns3/ndnSIM/model/cs/ndn-content-store.hpp"
 
@@ -152,6 +154,12 @@ public: // forwarding entrypoints and tables
   getPit()
   {
     return m_pit;
+  }
+
+  void
+  dontsend()
+  {
+    m_pit.setTransmit(false);
   }
 
   Cs&
@@ -304,6 +312,8 @@ private:
   DeadNonceList      m_deadNonceList;
   NetworkRegionTable m_networkRegionTable;
   shared_ptr<Face>   m_csFace;
+  std::queue<Data>   m_rtxData;
+  std::queue<Interest> m_rtxInterest;
 
   ns3::Ptr<ns3::ndn::ContentStore> m_csFromNdnSim;
 

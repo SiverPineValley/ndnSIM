@@ -334,6 +334,12 @@ protected: // accessors
     return m_measurements;
   }
 
+  void
+  dontsend()
+  {
+    m_forwarder.dontsend();
+  }
+
   Face*
   getFace(FaceId id) const
   {

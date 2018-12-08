@@ -69,7 +69,8 @@ CustomStrategyBase::afterReceiveNack(const Face& inFace, const lp::Nack& nack,
   if ( nack.getReason() == lp::NackReason::CONGESTION )
   {
     const shared_ptr<pit::Entry>& extEntry = this->lookupPit(nack.getInterest());
-    this->setExpiryTimer(extEntry, ndn::time::milliseconds(250)); // 3 seconds
+    this->setExpiryTimer(extEntry, ndn::time::milliseconds(1000)); // 5 seconds
+    this->dontsend();
   }
 }
 
