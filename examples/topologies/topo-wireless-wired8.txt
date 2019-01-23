@@ -1,0 +1,31 @@
+# topo-wireless-wired.txt
+
+
+router
+
+# node	city	y	x
+ap		NA		5	0
+r1		NA		10	0
+p1		NA		15	-40
+p2		NA		15	-30
+p3		NA		15	-20
+p4		NA		15	-10
+p5		NA		15	0
+p6		NA		15	10
+p7		NA		15	20
+p8		NA		15	30
+p9		NA		15	40
+
+link
+
+# from	to	capacity	metric	delay	queue
+ap		r1	10000Mbps		1		10ms	100
+r1		p1	10000Mbps		1		10ms	100
+r1		p2	10000Mbps		1		10ms	100
+r1		p3	10000Mbps		1		10ms	100
+r1		p4	10000Mbps		1		10ms	100
+r1		p5	10000Mbps		1		10ms	100
+r1		p6	10000Mbps		1		10ms	100
+r1		p7	10000Mbps		1		10ms	100
+r1		p8	10000Mbps		1		10ms	100
+r1		p9	10000Mbps		1		10ms	100
