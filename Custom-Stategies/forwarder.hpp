@@ -39,9 +39,11 @@
 #include "table/dead-nonce-list.hpp"
 #include "table/network-region-table.hpp"
 #include <queue>
+#include <map>
 #include <utility>
 
 #include "ns3/ndnSIM/model/cs/ndn-content-store.hpp"
+#include "ns3/simulator.h"
 
 namespace nfd {
 
@@ -160,6 +162,7 @@ public: // forwarding entrypoints and tables
   dontsend()
   {
     m_pit.setTransmit(false);
+    lock = ns3::Simulator::Now().GetSeconds();
   }
 
   Cs&
@@ -314,6 +317,10 @@ private:
   shared_ptr<Face>   m_csFace;
   std::queue<Data>   m_rtxData;
   std::queue<Interest> m_rtxInterest;
+  int is_huge = 0;
+  int is_mid = 3;
+  double lock;
+  // std::map<uint32_t,double> m_cal;
 
   ns3::Ptr<ns3::ndn::ContentStore> m_csFromNdnSim;
 

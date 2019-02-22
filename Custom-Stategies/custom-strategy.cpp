@@ -66,12 +66,18 @@ CustomStrategyBase::afterReceiveNack(const Face& inFace, const lp::Nack& nack,
   // NFD_LOG_DEBUG("afterReceiveNack inFace=" << inFace.getId() << " pitEntry=" << pitEntry->getName());
 
   // Get CONGESTION Nack
-  if ( nack.getReason() == lp::NackReason::CONGESTION )
-  {
-    const shared_ptr<pit::Entry>& extEntry = this->lookupPit(nack.getInterest());
-    this->setExpiryTimer(extEntry, ndn::time::milliseconds(1000)); // 5 seconds
-    this->dontsend();
-  }
+  // if ( nack.getReason() == lp::NackReason::CONGESTION )
+  // {
+  //   std::string content_name = nack.getInterest().getName().toUri();
+  //   if( (content_name.find("Huge") != std::string::npos) || (content_name.find("Mid") != std::string::npos) )
+  //   {
+  //     const shared_ptr<pit::Entry>& extEntry = this->lookupPit(nack.getInterest());
+  //     this->setExpiryTimer(extEntry, ndn::time::milliseconds(60000)); // 60 seconds
+  //     this->dontsend();
+  //   }
+
+  // }
+  return;
 }
 
 NFD_REGISTER_STRATEGY(CustomStrategy);
